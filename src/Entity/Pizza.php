@@ -1,0 +1,98 @@
+<?php
+
+namespace App\Entity;
+
+use App\Enum\IngredientsEnum;
+use App\Enum\SizeEnum;
+use App\Repository\PizzaRepository;
+use Doctrine\ORM\Mapping as ORM;
+
+#[ORM\Entity(repositoryClass: PizzaRepository::class)]
+class Pizza
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 55)]
+    private ?string $name = null;
+
+    #[ORM\Column(length: 55)]
+    private ?string $size = null;
+
+    #[ORM\Column]
+    private array $ingredients = [];
+
+
+    public function __construct(SizeEnum $size = null, array $ingredients = [])
+    {
+        $this->name = 'Pizza';
+        $this->size = $size->value ?? SizeEnum::SMALL->value;
+        $this->ingredients = array_map(fn($i) => $i->value, $ingredients);
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    public function getSize(): ?SizeEnum
+    {
+        // Retorna el Enum de acuerdo al valor de la base de datos
+        return SizeEnum::from($this->size);
+    }
+
+    public function setSize(SizeEnum $size): self
+    {
+        $this->size = $size->value;  // Guardar el valor del enum como string
+
+        return $this;
+    }
+
+    /**
+     * @return IngredientsEnum[]
+     */
+    public function getIngredients(): array
+    {
+        return array_map(fn($i) => IngredientsEnum::from($i), $this->ingredients);
+    }
+
+    /**
+     * @param IngredientsEnum[] $ingredients
+     */
+    public function setIngredients(array $ingredients): self
+    {
+        $this->ingredients = array_map(fn($i) => $i->value, $ingredients);
+        return $this;
+    }
+
+    public function addIngredient(IngredientsEnum $ingredient): self
+    {
+        if (!in_array($ingredient->value, $this->ingredients)) {
+            $this->ingredients[] = $ingredient->value;
+        }
+        return $this;
+    }
+
+    public function removeIngredient(IngredientsEnum $ingredient): self
+    {
+        $this->ingredients = array_filter(
+            $this->ingredients,
+            fn($i) => $i !== $ingredient->value
+        );
+        return $this;
+    }
+}
