@@ -11,4 +11,10 @@ enum IngredientsEnum: string
     case OLIVES = 'olives';
     case TOMATO = 'tomato';
     case CHICKEN = 'chicken';
+
+    public static function getValues(): array
+    {
+        return array_map(fn(self $case) => $case->value, self::cases());
+    }
+
 }

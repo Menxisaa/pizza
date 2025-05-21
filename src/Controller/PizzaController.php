@@ -2,14 +2,22 @@
 
 namespace App\Controller;
 
+use App\Dto\CreatePizzaDto;
 use App\Entity\Pizza;
+use App\Enum\IngredientsEnum;
+use App\Enum\BaseEnum;
+use App\Enum\SizeEnum;
 use App\Form\PizzaForm;
 use App\Repository\PizzaRepository;
+use App\Service\PizzaCreatorService;
+use App\Service\PizzaRequestHandler;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/pizza')]
 final class PizzaController extends AbstractController
@@ -22,25 +30,42 @@ final class PizzaController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_pizza_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
-    {
-        $pizza = new Pizza();
-        $form = $this->createForm(PizzaForm::class, $pizza);
-        $form->handleRequest($request);
+    #[Route('/new', name: 'app_pizza_new', methods: ['POST'])]
+    public function new(
+        Request $request,
+        PizzaRequestHandler $requestHandler,
+        PizzaCreatorService $pizzaCreator
+    ): JsonResponse {
+        $data = json_decode($request->getContent(), true);
+        $result = $requestHandler->handleRequest($data);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $entityManager->persist($pizza);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('app_pizza_index', [], Response::HTTP_SEE_OTHER);
+        if (is_array($result)) {
+            return new JsonResponse(['errors' => $result], Response::HTTP_BAD_REQUEST);
         }
 
-        return $this->render('pizza/new.html.twig', [
-            'pizza' => $pizza,
-            'form' => $form,
-        ]);
+        $pizza = $pizzaCreator->create($result); // Lógica de negocio separada
+
+        return new JsonResponse(['id' => $pizza->getId()], Response::HTTP_CREATED);
     }
+
+//    public function new(Request $request, EntityManagerInterface $entityManager): Response
+//    {
+//        $pizza = new Pizza();
+//        $form = $this->createForm(PizzaForm::class, $pizza);
+//        $form->handleRequest($request);
+//
+//        if ($form->isSubmitted() && $form->isValid()) {
+//            $entityManager->persist($pizza);
+//            $entityManager->flush();
+//
+//            return $this->redirectToRoute('app_pizza_index', [], Response::HTTP_SEE_OTHER);
+//        }
+//
+//        return $this->render('pizza/new.html.twig', [
+//            'pizza' => $pizza,
+//            'form' => $form,
+//        ]);
+//    }
 
     #[Route('/{id}', name: 'app_pizza_show', methods: ['GET'])]
     public function show(Pizza $pizza): Response

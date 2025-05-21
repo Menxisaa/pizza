@@ -16,6 +16,14 @@ class PizzaRepository extends ServiceEntityRepository
         parent::__construct($registry, Pizza::class);
     }
 
+    public function savePizza(Pizza $pizza, bool $flush = true): void
+    {
+        $this->getEntityManager()->persist($pizza);
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
 //    /**
 //     * @return Pizza[] Returns an array of Pizza objects
 //     */

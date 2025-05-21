@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\BaseEnum;
 use App\Enum\IngredientsEnum;
 use App\Enum\SizeEnum;
 use App\Repository\PizzaRepository;
@@ -21,14 +22,16 @@ class Pizza
     #[ORM\Column(length: 55)]
     private ?string $size = null;
 
+    #[ORM\Column(length: 55)]
+    private ?string $base = null;
+
     #[ORM\Column]
     private array $ingredients = [];
 
 
-    public function __construct(SizeEnum $size = null, array $ingredients = [])
+    public function __construct(array $ingredients = [])
     {
         $this->name = 'Pizza';
-        $this->size = $size->value ?? SizeEnum::SMALL->value;
         $this->ingredients = array_map(fn($i) => $i->value, $ingredients);
     }
 
@@ -51,13 +54,24 @@ class Pizza
 
     public function getSize(): ?SizeEnum
     {
-        // Retorna el Enum de acuerdo al valor de la base de datos
         return SizeEnum::from($this->size);
     }
 
     public function setSize(SizeEnum $size): self
     {
-        $this->size = $size->value;  // Guardar el valor del enum como string
+        $this->size = $size->value;
+
+        return $this;
+    }
+
+    public function getBase(): ?BaseEnum
+    {
+        return BaseEnum::from($this->base);
+    }
+
+    public function setBase(?BaseEnum $base): self
+    {
+        $this->base = $base->value;
 
         return $this;
     }
@@ -95,4 +109,5 @@ class Pizza
         );
         return $this;
     }
+
 }
