@@ -28,6 +28,9 @@ class Pizza
     #[ORM\Column]
     private array $ingredients = [];
 
+    #[ORM\Column(type: 'integer')]
+    private int $priceInCents = 0;
+
 
     public function __construct(array $ingredients = [])
     {
@@ -108,6 +111,27 @@ class Pizza
             fn($i) => $i !== $ingredient->value
         );
         return $this;
+    }
+
+    // Métodos para trabajar en euros y céntimos
+    public function getPriceInCents(): int
+    {
+        return $this->priceInCents;
+    }
+
+    public function getPriceInEuros(): float
+    {
+        return $this->priceInCents / 100;
+    }
+
+    public function setPriceInCents(int $cents): void
+    {
+        $this->priceInCents = $cents;
+    }
+
+    public function setPriceInEuros(float $euros): void
+    {
+        $this->priceInCents = (int) round($euros * 100);
     }
 
 }

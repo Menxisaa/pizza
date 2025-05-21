@@ -14,4 +14,13 @@ enum SizeEnum: string
         self::MEDIUM->value,
         self::LARGE->value,
     ];
+
+    public function getCost(): float
+    {
+        return match ($this) {
+            self::MEDIUM => 1495,
+            self::LARGE => 1995,
+            default => 995,
+        };
+    }
 }

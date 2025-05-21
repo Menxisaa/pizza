@@ -14,13 +14,11 @@ enum BaseEnum: string
     case STUFFED_CHEDDAR = 'stuffed_cheddar';
     case STUFFED_MOZZARELLA_TOMATO = 'stuffed_mozzarella_tomato';
 
-    // Método para obtener opciones válidas (ej. validación)
     public static function validValues(): array
     {
         return array_column(self::cases(), 'value');
     }
 
-    // Descripción legible para humanos
     public function label(): string
     {
         return match ($this) {
@@ -33,15 +31,14 @@ enum BaseEnum: string
         };
     }
 
-    // Precio adicional (ejemplo)
     public function extraCost(): float
     {
         return match ($this) {
-            self::THREE_LAYERS => 3.50,
+            self::THREE_LAYERS => 350,
             self::STUFFED_MOZZARELLA_CHILI,
             self::STUFFED_CHEDDAR,
-            self::STUFFED_MOZZARELLA_TOMATO => 2.00,
-            default => 0.00, // Bases clásica/fina sin sobrecoste
+            self::STUFFED_MOZZARELLA_TOMATO => 200,
+            default => 0,
         };
     }
 }

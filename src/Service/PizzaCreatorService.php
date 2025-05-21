@@ -17,6 +17,10 @@ readonly class PizzaCreatorService
     {
     }
 
+    /**
+     * @param CreatePizzaDto $dto
+     * @return Pizza
+     */
     public function create(CreatePizzaDto $dto): Pizza
     {
         // Validación básica
@@ -40,8 +44,24 @@ readonly class PizzaCreatorService
         $pizza->setSize($size);
         $pizza->setBase($base);
 
+        $totalCents = $this->calculateTotalPriceInCents($pizza);
+
+        $pizza->setPriceInCents($totalCents);
+
         $this->pizzaRepository->savePizza($pizza);
 
         return $pizza;
+    }
+
+    /**
+     * @param Pizza $pizza
+     * @return int
+     */
+    private function calculateTotalPriceInCents(Pizza $pizza): int
+    {
+        $total = $pizza->getSize()->getCost();
+        $total += $pizza->getBase()->extraCost();
+
+        return $total;
     }
 }
