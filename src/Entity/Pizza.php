@@ -79,12 +79,16 @@ class Pizza
         return $this;
     }
 
+
     /**
      * @return IngredientsEnum[]
      */
     public function getIngredients(): array
     {
-        return array_map(fn($i) => IngredientsEnum::from($i), $this->ingredients);
+        return array_map(
+            fn(string $ingredient) => IngredientsEnum::from($ingredient),
+            $this->ingredients
+        );
     }
 
     /**

@@ -15,6 +15,16 @@ enum SizeEnum: string
         self::LARGE->value,
     ];
 
+    public function label(): string
+    {
+        return match ($this) {
+            self::SMALL => 'Pequeña',
+            self::MEDIUM => 'Mediana',
+            self::LARGE => 'Grande'
+        };
+    }
+
+
     public function getCost(): float
     {
         return match ($this) {
