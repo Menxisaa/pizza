@@ -56,87 +56,9 @@ final class PizzaController extends AbstractController
     #[Route('/{id}', name: 'app_pizza_show', methods: ['GET'])]
     public function show(Pizza $pizza, SerializerInterface $serializer): JsonResponse
     {
-        try {
-            // 1. Construir el array de datos estructurados
-            $responseData = [
-                'id' => $pizza->getId(),
-                'size' => $this->formatEnum($pizza->getSize()->value, SizeEnum::class), // Size es un Enum
-                'base' => $this->formatEnum($pizza->getBase()->value, BaseEnum::class), // Base es un Enum
-                'ingredients' => array_map(
-                    fn(IngredientsEnum $ingredient) => $this->formatEnum($ingredient->value, IngredientsEnum::class),
-                    $pizza->getIngredients()
-                ),
+        $data = $serializer->serialize($pizza, 'json');
 
-                'price' => [
-                    'cents' => $pizza->getPriceInCents(),
-                    'euros' => $pizza->getPriceInEuros(),
-                    'formatted' => $this->formatPrice($pizza->getPriceInEuros())
-                ],
-                'metadata' => [
-                    /*'created_at' => $pizza->getCreatedAt()?->format(\DateTimeInterface::ATOM),
-                    'updated_at' => $pizza->getUpdatedAt()?->format(\DateTimeInterface::ATOM)*/
-                ]
-            ];
-
-            // 2. Serializar con grupos de normalización (opcional)
-            $context = [
-                'groups' => ['pizza:read'],
-                'json_encode_options' => JsonResponse::DEFAULT_ENCODING_OPTIONS | JSON_PRETTY_PRINT
-            ];
-
-            return new JsonResponse(
-                $serializer->serialize($responseData, 'json', $context),
-                Response::HTTP_OK,
-                [],
-                true
-            );
-
-        } catch (\Throwable $e) {
-            // 3. Manejo centralizado de errores (usaría un EventSubscriber en producción)
-            return new JsonResponse(
-                ['error' => 'Failed to process pizza data: ' .  $e],
-                Response::HTTP_INTERNAL_SERVER_ERROR
-            );
-        }
-    }
-
-    // Helper para formatear Enums
-    private function formatEnum(string $value, string $enumClass): array
-    {
-        // Verificar si la clase es un Enum válido
-        if (!enum_exists($enumClass)) {
-            throw new InvalidArgumentException("$enumClass is not a valid enum class");
-        }
-
-        // Crear un reflejo para acceder a los métodos estáticos
-        $reflection = new \ReflectionEnum($enumClass);
-
-        // Versión segura para cualquier PHP 8.1+ (sin depender de tryFrom)
-        $cases = $reflection->getCases();
-        foreach ($cases as $case) {
-            if ($case->getValue()->value === $value) {
-                $enum = $case->getValue();
-                return [
-                    'value' => $value,
-                    'label' => method_exists($enum, 'label') ? $enum->label() : $value,
-                    'extra_cost' => method_exists($enum, 'extraCost') ? $enum->extraCost() : 0
-                ];
-            }
-        }
-
-        // Valor no encontrado en el Enum
-        return [
-            'value' => $value,
-            'label' => 'Desconocido',
-            'extra_cost' => 0
-        ];
-    }
-
-    // Helper para formatear precio
-    private function formatPrice(float $price): string
-    {
-        $formatter = new NumberFormatter('es_ES', NumberFormatter::CURRENCY);
-        return $formatter->formatCurrency($price, 'EUR');
+        return new JsonResponse($data, Response::HTTP_OK, [], true);
     }
 
     #[Route('/{id}/edit', name: 'app_pizza_edit', methods: ['GET', 'POST'])]

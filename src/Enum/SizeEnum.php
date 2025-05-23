@@ -25,7 +25,7 @@ enum SizeEnum: string
     }
 
 
-    public function getCost(): float
+    public function extraCost(): float
     {
         return match ($this) {
             self::MEDIUM => 1495,

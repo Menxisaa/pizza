@@ -17,4 +17,17 @@ enum IngredientsEnum: string
         return array_map(fn(self $case) => $case->value, self::cases());
     }
 
+    public function label(): string
+    {
+        return match ($this) {
+            self::CHEESE => 'Pequeña',
+            self::PEPPERONI => 'Pepperoni',
+            self::MUSHROOM => 'mushroom',
+            self::OLIVES => 'Olivas',
+            self::TOMATO => 'Tomate',
+            self::CHICKEN => 'Pollo',
+        };
+    }
+
+
 }

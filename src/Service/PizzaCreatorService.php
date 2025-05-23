@@ -59,7 +59,7 @@ readonly class PizzaCreatorService
      */
     private function calculateTotalPriceInCents(Pizza $pizza): int
     {
-        $total = $pizza->getSize()->getCost();
+        $total = $pizza->getSize()->extraCost();
         $total += $pizza->getBase()->extraCost();
 
         return $total;
