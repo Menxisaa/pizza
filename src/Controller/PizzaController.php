@@ -2,35 +2,28 @@
 
 namespace App\Controller;
 
-use App\Dto\CreatePizzaDto;
 use App\Entity\Pizza;
-use App\Enum\IngredientsEnum;
-use App\Enum\BaseEnum;
-use App\Enum\SizeEnum;
 use App\Form\PizzaForm;
-use App\Repository\PizzaRepository;
+use App\Provider\PizzaEnumProvider;
 use App\Service\PizzaCreatorService;
 use App\Service\PizzaRequestHandler;
 use Doctrine\ORM\EntityManagerInterface;
-use InvalidArgumentException;
-use NumberFormatter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/pizza')]
 final class PizzaController extends AbstractController
 {
+    public function __construct(private readonly PizzaEnumProvider $pizzaProvider) {}
+
     #[Route(name: 'app_pizza_index', methods: ['GET'])]
-    public function index(PizzaRepository $pizzaRepository): Response
+    public function index(): Response
     {
-        return $this->render('pizza/index.html.twig', [
-            'pizzas' => $pizzaRepository->findAll(),
-        ]);
+        return $this->json($this->pizzaProvider->getPizzaEnums());
     }
 
     #[Route('/new', name: 'app_pizza_new', methods: ['POST'])]

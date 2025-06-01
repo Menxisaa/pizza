@@ -3,7 +3,7 @@
 // src/Enum/IngredientsEnum.php
 namespace App\Enum;
 
-enum IngredientsEnum: string
+enum IngredientsEnum: string implements LabeledEnumInterface
 {
     case CHEESE = 'cheese';
     case PEPPERONI = 'pepperoni';

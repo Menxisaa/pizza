@@ -3,7 +3,7 @@
 // src/Enum/SizeEnum.php
 namespace App\Enum;
 
-enum SizeEnum: string
+enum SizeEnum: string implements LabeledEnumInterface, HasExtraCostInterface
 {
     case SMALL = 'small';
     case MEDIUM = 'medium';
@@ -25,7 +25,7 @@ enum SizeEnum: string
     }
 
 
-    public function extraCost(): float
+    public function extraCost(): int
     {
         return match ($this) {
             self::MEDIUM => 1495,

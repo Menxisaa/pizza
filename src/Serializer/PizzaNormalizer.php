@@ -3,16 +3,18 @@
 namespace App\Serializer;
 
 use App\Entity\Pizza;
-use App\Enum\BaseEnum;
+use App\Enum\HasExtraCostInterface;
 use App\Enum\IngredientsEnum;
+use App\Enum\LabeledEnumInterface;
 use App\Enum\SizeEnum;
+use BackedEnum;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
-class PizzaNormalizer implements NormalizerInterface
+readonly class PizzaNormalizer implements NormalizerInterface
 {
     public function __construct(
-        private readonly ObjectNormalizer $objectNormalizer
+        private ObjectNormalizer $objectNormalizer
     ) {}
 
     public function normalize($pizza, string $format = null, array $context = []): array
@@ -21,11 +23,11 @@ class PizzaNormalizer implements NormalizerInterface
         $data = $this->objectNormalizer->normalize($pizza, $format, $context);
 
 
-        // Transformar Enums a estructuras ricas
-        $data['size'] = $this->formatEnum($pizza->getSize()->value, SizeEnum::class);
-        $data['base'] = $this->formatEnum($pizza->getBase()->value, BaseEnum::class);
+        // Transformar Enums a estructuras
+        $data['size'] = $this->formatEnum($pizza->getSize());
+        $data['base'] = $this->formatEnum($pizza->getBase());
         $data['ingredients'] = array_map(
-            fn(IngredientsEnum $ingredient) => $this->formatEnum($ingredient->value, IngredientsEnum::class),
+            fn(IngredientsEnum $ingredient) => $this->formatEnumIngredients($ingredient),
             $pizza->getIngredients()
         );
 
@@ -39,19 +41,30 @@ class PizzaNormalizer implements NormalizerInterface
         return $data;
     }
 
-    private function formatEnum(string $value, string $enumClass): array
+    private function formatEnum(BackedEnum $enum): array
     {
-        $enum = $enumClass::tryFrom($value);
+        $extraPrice = ($enum instanceof HasExtraCostInterface) ? $enum->extraCost() : 0;
+
+        $isSize = $enum instanceof SizeEnum;
 
         return [
-            'value' => $value,
-            'label' => $enum?->label() ?? $value,
-            'extra_cost' => method_exists($enum, 'extraCost') ? $enum->extraCost() : 0
+            'value' => $enum->value,
+            'label' => $enum instanceof LabeledEnumInterface ? $enum->label() : $enum->value,
+            $isSize ? 'base_price' : 'extra_cost' => $extraPrice,
+            $isSize ? 'base_price_in_euro' : 'extra_cost_in_euro' => $extraPrice ? $extraPrice / 100 : 0.00,
+        ];
+    }
+
+    private function formatEnumIngredients(IngredientsEnum $enum): array
+    {
+        return [
+            'value' => $enum->value,
+            'label' => method_exists($enum, 'label') ? $enum->label() : $enum->value
         ];
     }
 
     public function supportsNormalization($data, string $format = null): bool
     {
-        return $data instanceof Pizza && $format === 'json';
+        return $data instanceof Pizza;
     }
 }

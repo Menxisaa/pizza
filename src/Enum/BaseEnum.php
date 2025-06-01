@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum BaseEnum: string
+enum BaseEnum: string implements LabeledEnumInterface, HasExtraCostInterface
 {
     // Bases
     case CLASSIC = 'classic';
@@ -31,7 +31,7 @@ enum BaseEnum: string
         };
     }
 
-    public function extraCost(): float
+    public function extraCost(): int
     {
         return match ($this) {
             self::THREE_LAYERS => 350,
